@@ -3,7 +3,8 @@
 from bruteforce import brute_force
 from optimized import optimized
 
-def main_menu() :
+
+def main_menu():
     """ Function to display the main menu """
     while True:
         print("\nSélectionnez l'algorithme de votre choix :\n")
@@ -17,6 +18,7 @@ def main_menu() :
             optimized()
         else:
             print("Option invalide. Veuillez réessayer")
+
 
 if __name__ == "__main__":
     main_menu()

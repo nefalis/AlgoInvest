@@ -2,6 +2,7 @@ import csv
 import time
 from itertools import combinations
 
+
 def brute_force():
     """ algorithme brute force """
 
@@ -48,7 +49,6 @@ def brute_force():
             print(f"  {action['name']} - Cost: {action['cost']}€, Profit: {action['profit']}%")
         print(f"\nCoût total des actions : {best_cost} euros")
         print(f"Profit total après 2 ans: {best_profit:.2f}€\n")
-        
 
     end_time = time.time()
     execution_time = end_time - start_time
@@ -79,14 +79,14 @@ def brute_force():
     # # trie des action en ration bénéfice/prix ordre décroissant
     # sorted_actions = sorted(max_price_action, key=lambda x: x['profit_ratio'], reverse=True)
 
-    # # selection des actions 
+    # # selection des actions
     # selected_actions = []
     # total_cost = 0
 
     # for action in sorted_actions:
     #     # verif si action est dans le budget
     #     if total_cost + action['price'] <= budget_max:
-    #         # vérif si l'action est disponible 
+    #         # vérif si l'action est disponible
     #         if action not in selected_actions:
     #             selected_actions.append(action)
     #             total_cost += action['price']
@@ -104,7 +104,7 @@ def brute_force():
 
     # # Fin de la mesure du temps
     # end_time = time.time()
-    
+
     # # Calcul du temps d'exécution
     # execution_time = end_time - start_time
     # print(f"\nTemps d'exécution : {execution_time:.4f} secondes\n")

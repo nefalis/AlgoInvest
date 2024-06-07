@@ -1,8 +1,9 @@
 import csv
 import time
 
+
 def choice_csv():
-    #choix du fichier csv a lire
+    # choix du fichier csv a lire
     print("Veuillez choisir le fichier CSV à analyser :")
     print("1. action_bruteforce.csv")
     print("2. data/dataset1_Python+P7.csv")
@@ -18,6 +19,7 @@ def choice_csv():
     else:
         print("Choix invalide. Veuillez relancer le programme et choisir 1, 2 ou 3.")
         return
+
 
 def optimized():
     """ algorithme optimisé """
@@ -40,43 +42,46 @@ def optimized():
                 action = {
                     'name': row['name'],
                     'cost': cost,
-                    'profit': profit
+                    'profit': profit,
+                    'ratio': (profit/100)/cost
                 }
                 actions.append(action)
 
+    # tri des actions par ratio cout/profit croissant
+    actions.sort(key=lambda x: x['ratio'], reverse=True)
+
     # Initialise le tableau de programmation dynamique
     # n= nombre total d'action dispo
-    # dp = tableau dynamique - dp[i][w] = profit maximum
-    n = len(actions)
-    dp = [[0] * (max_budget + 1) for _ in range(n + 1)]
+    action_number = len(actions)
+    dynamic_table = [[0] * (max_budget + 1) for _ in range(action_number + 1)]
 
     # Remplir le tableau
     # parcourt chaque action dispo
-    for i in range(1, n + 1):
+    for i in range(1, action_number + 1):
         # parcourt chaque budget possible
-        for w in range(max_budget + 1):
-            # si cout action est inf a budget w - dp[i][w] prend la valeur max
-            if actions[i-1]['cost'] <= w:
-                # dp[i-1][w] profit max sans action actuelle
-                # actions[i-1]['cost'] * actions[i-1]['profit'] / 100 profit de l'action actuel
-                # dp[i-1][w - actions[i-1]['cost']] profit max pour le budget restant avec action actuelle
-                dp[i][w] = max(dp[i-1][w], actions[i-1]['cost'] * actions[i-1]['profit'] / 100 + dp[i-1][w - int(actions[i-1]['cost'])])
-            # si cout depasse budget on garde la valeur dp[i][w]
+        for budget in range(max_budget + 1):
+            # si cout action est inf a budget w - dynamic_table[i]budget prend la valeur max
+            if actions[i-1]['cost'] <= budget:
+                # profit max = profit max sans action actuelle, cout profit actuel * %benef /100
+                #  + profit max pour le budget restant avec action actuelle
+                dynamic_table[i][budget] = max(
+                    dynamic_table[i-1][budget],
+                    actions[i-1]['cost'] * actions[i-1]['profit'] / 100 + dynamic_table[i-1][budget - int(actions[i-1]['cost'])])
+            # si cout depasse budget on garde la valeur dynamic_table[i][budget]
             else:
-                dp[i][w] = dp[i-1][w]
+                dynamic_table[i][budget] = dynamic_table[i-1][budget]
 
-
-    # Reconstituer la meilleure combinaison avec le tableau dp
+    # Reconstituer la meilleure combinaison avec le dynamic_table
     # on commence par budget max et on remonte en verif les actions incluses dans la combinaison optimale
-    w = max_budget
+    remaining_budget = max_budget
     best_combination = []
     # on parcourt les actions en sens inverse de n à 1 - n=nb total action
-    for i in range(n, 0, -1):
-        # verif si dp[i][w] est différent de dp[i-1][w] car i-1 a été inclu si oui donc ajout action a best_combination
-        if dp[i][int(w)] != dp[i-1][int(w)]:
+    for i in range(action_number, 0, -1):
+        # verif si dynamic_table[remaining_budget] est différent de dynamic_table[i-1][remaining_budget] car i-1 a été inclu si oui donc ajout action a best_combination
+        if dynamic_table[i][int(remaining_budget)] != dynamic_table[i-1][int(remaining_budget)]:
             best_combination.append(actions[i-1])
-            # on reduit le budget w de cost de l'action i-1
-            w -= actions[i-1]['cost']
+            # on reduit le remaining_budget de cost de l'action i-1
+            remaining_budget -= actions[i-1]['cost']
 
     # Calculer le profit total de la meilleure combinaison
     best_profit = sum(action['cost'] * action['profit'] / 100 for action in best_combination)
