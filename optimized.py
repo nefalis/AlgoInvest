@@ -20,7 +20,6 @@ def choice_csv():
         print("Choix invalide. Veuillez relancer le programme et choisir 1, 2 ou 3.")
         return
 
-
 def optimized():
     """ algorithme optimisé """
 
@@ -51,7 +50,6 @@ def optimized():
     actions.sort(key=lambda x: x['ratio'], reverse=True)
 
     # Initialise le tableau de programmation dynamique
-    # n= nombre total d'action dispo
     action_number = len(actions)
     dynamic_table = [[0] * (max_budget + 1) for _ in range(action_number + 1)]
 
@@ -60,7 +58,7 @@ def optimized():
     for i in range(1, action_number + 1):
         # parcourt chaque budget possible
         for budget in range(max_budget + 1):
-            # si cout action est inf a budget w - dynamic_table[i]budget prend la valeur max
+            # si cout action est inf a budget - dynamic_table[i]budget prend la valeur max
             if actions[i-1]['cost'] <= budget:
                 # profit max = profit max sans action actuelle, cout profit actuel * %benef /100
                 #  + profit max pour le budget restant avec action actuelle
@@ -100,3 +98,7 @@ def optimized():
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"\nTemps d'exécution : {execution_time:.4f} secondes\n")
+
+# # ------- décommanter la ligne ci dessous pour lancer sans le fichier main ------- # 
+# # optimized()
+
