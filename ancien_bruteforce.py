@@ -1,6 +1,6 @@
 import csv
 import time
-from itertools import combinations
+
 
 def brute_force():
 
@@ -14,14 +14,14 @@ def brute_force():
     # lecture des données du fichier csv
     actions = []
     with open(csv_file_path, newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                # Convertir les valeurs de price et profit en entiers
-                price = int(row['price'])
-                profit = int(row['profit'])
-                # # Calculer le ratio bénéfice/coût
-                profit_ratio = profit / price
-                actions.append({'name': row['name'], 'price': price, 'profit': profit, 'profit_ratio': profit_ratio})
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            # Convertir les valeurs de price et profit en entiers
+            price = int(row['price'])
+            profit = int(row['profit'])
+            # # Calculer le ratio bénéfice/coût
+            profit_ratio = profit / price
+            actions.append({'name': row['name'], 'price': price, 'profit': profit, 'profit_ratio': profit_ratio})
 
     # filtre des actions dont le cout est inférieur ou egale à la valeur max du client
     max_price_action = [action for action in actions if action['price'] <= budget_max]
@@ -58,6 +58,7 @@ def brute_force():
     # Calcul du temps d'exécution
     execution_time = end_time - start_time
     print(f"\nTemps d'exécution : {execution_time:.4f} secondes\n")
+
 
 # Appel de la fonction
 brute_force()

@@ -1,14 +1,17 @@
 import csv
 import time
+from rich import print
+
+# ----- Pour lancer sans le fichier main, vous devez décommenter la ligne situé a la fin du fichier ----- #
 
 
 def choice_csv():
-    # choix du fichier csv a lire
-    print("Veuillez choisir le fichier CSV à analyser :")
+    """ Permet à l'utilisateur de choisir un fichier CSV parmi une liste prédéfinie. """
+    print("[cyan]Veuillez choisir le fichier CSV à analyser :[/cyan]")
     print("1. action_bruteforce.csv")
     print("2. data/dataset1_Python+P7.csv")
     print("3. data/dataset2_Python+P7.csv")
-    choice = input("Entrez le numéro correspondant au fichier (1, 2 ou 3) : ")
+    choice = input("Entrez le numéro correspondant au fichier (1, 2 ou 3) : \n")
 
     if choice == '1':
         return 'data/action_bruteforce.csv'
@@ -20,17 +23,9 @@ def choice_csv():
         print("Choix invalide. Veuillez relancer le programme et choisir 1, 2 ou 3.")
         return
 
-def optimized():
-    """ algorithme optimisé """
 
-    csv_file_path = choice_csv()
-
-    # Début de la mesure du temps
-    start_time = time.time()
-
-    max_budget = 500
-
-    # lecture des données du fichier csv
+def read_csv(csv_file_path):
+    """ Lit le fichier CSV et retourne une liste de dictionnaires représentant les actions."""
     actions = []
     with open(csv_file_path, mode='r', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -38,67 +33,68 @@ def optimized():
             cost = float(row['price'])
             profit = float(row['profit'])
             if cost > 0 and profit > 0:
-                action = {
+                actions.append({
                     'name': row['name'],
                     'cost': cost,
                     'profit': profit,
-                    'ratio': (profit/100)/cost
-                }
-                actions.append(action)
+                })
+    return actions
 
-    # tri des actions par ratio cout/profit croissant
-    actions.sort(key=lambda x: x['ratio'], reverse=True)
 
-    # Initialise le tableau de programmation dynamique
-    action_number = len(actions)
-    dynamic_table = [[0] * (max_budget + 1) for _ in range(action_number + 1)]
+def calculate_total_cost(selected_actions):
+    """ Calcule le coût total des actions sélectionnées."""
+    return sum(action['cost'] for action in selected_actions)
 
-    # Remplir le tableau
-    # parcourt chaque action dispo
-    for i in range(1, action_number + 1):
-        # parcourt chaque budget possible
-        for budget in range(max_budget + 1):
-            # si cout action est inf a budget - dynamic_table[i]budget prend la valeur max
-            if actions[i-1]['cost'] <= budget:
-                # profit max = profit max sans action actuelle, cout profit actuel * %benef /100
-                #  + profit max pour le budget restant avec action actuelle
-                dynamic_table[i][budget] = max(
-                    dynamic_table[i-1][budget],
-                    actions[i-1]['cost'] * actions[i-1]['profit'] / 100 + dynamic_table[i-1][budget - int(actions[i-1]['cost'])])
-            # si cout depasse budget on garde la valeur dynamic_table[i][budget]
-            else:
-                dynamic_table[i][budget] = dynamic_table[i-1][budget]
 
-    # Reconstituer la meilleure combinaison avec le dynamic_table
-    # on commence par budget max et on remonte en verif les actions incluses dans la combinaison optimale
-    remaining_budget = max_budget
-    best_combination = []
-    # on parcourt les actions en sens inverse de n à 1 - n=nb total action
-    for i in range(action_number, 0, -1):
-        # verif si dynamic_table[remaining_budget] est différent de dynamic_table[i-1][remaining_budget] car i-1 a été inclu si oui donc ajout action a best_combination
-        if dynamic_table[i][int(remaining_budget)] != dynamic_table[i-1][int(remaining_budget)]:
-            best_combination.append(actions[i-1])
-            # on reduit le remaining_budget de cost de l'action i-1
-            remaining_budget -= actions[i-1]['cost']
+def calculate_total_profit(selected_actions):
+    """ Calcule le profit total des actions sélectionnées après 2 ans."""
+    return sum((action['profit'] * action['cost']) / 100 for action in selected_actions)
 
-    # Calculer le profit total de la meilleure combinaison
-    best_profit = sum(action['cost'] * action['profit'] / 100 for action in best_combination)
-    best_cost = sum(action['cost'] for action in best_combination)
 
-    # Affichage des résultats
-    if not best_combination:
+def select_actions(actions, max_budget):
+    """ Sélectionne les actions à acheter en maximisant le profit tout en respectant le budget."""
+    actions.sort(key=lambda d: d['profit'], reverse=True)
+    selected_actions = []
+
+    for action in actions:
+        if calculate_total_cost(selected_actions) + action['cost'] <= max_budget:
+            selected_actions.append(action)
+
+    return selected_actions
+
+
+def optimized():
+    """ Exécute l'algorithme optimisé pour sélectionner les actions à acheter."""
+
+    max_budget = 500
+
+    csv_file_path = choice_csv()
+    if not csv_file_path:
+        return
+
+    start_time = time.time()
+
+    actions = read_csv(csv_file_path)
+    if not actions:
+        return
+
+    selected_actions = select_actions(actions, max_budget)
+
+    if not selected_actions:
         print("Pas de combinaison valide trouvée.")
     else:
-        print("Les actions sélectionnées sont :")
-        for action in best_combination:
-            print(f"  {action['name']} - Coût: {action['cost']}€, Profit: {action['profit']}%")
-        print(f"\nCoût total des actions : {best_cost} euros")
-        print(f"Profit total après 2 ans: {best_profit:.2f}€\n")
+        print("\n[cyan]Les actions sélectionnées sont :[/cyan]")
+        for action in selected_actions:
+            print(f"{action['name']} - Coût: {action['cost']}€, Profit: {action['profit']}%")
+
+        total_cost = calculate_total_cost(selected_actions)
+        total_profit = calculate_total_profit(selected_actions)
+
+        print(f"\n[cyan]Coût total des actions : {total_cost:.3f} euros[/cyan]")
+        print(f"[cyan]Profit total après 2 ans: {total_profit:.3f}€[/cyan]\n")
 
     end_time = time.time()
-    execution_time = end_time - start_time
-    print(f"\nTemps d'exécution : {execution_time:.4f} secondes\n")
+    print(f"Temps d'exécution : {end_time - start_time:.4f} secondes\n")
 
-# # ------- décommanter la ligne ci dessous pour lancer sans le fichier main ------- # 
-# # optimized()
-
+# # ------- décommanter la ligne ci dessous pour lancer sans le fichier main ------- #
+# optimized()
