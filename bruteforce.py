@@ -1,7 +1,7 @@
 import csv
 import time
-from rich import print
 from itertools import combinations
+import tracemalloc
 
 # ----- Pour lancer sans le fichier main, vous devez décommenter la ligne situé a la fin du fichier ----- #
 
@@ -15,6 +15,9 @@ def brute_force():
 
     # Début de la mesure du temps
     start_time = time.time()
+
+    # Début de la mesure de la mémoire
+    tracemalloc.start()
 
     max_budget = 500
     csv_file_path = 'data/action_bruteforce.csv'
@@ -51,15 +54,20 @@ def brute_force():
     if best_combination is None:
         print("Pas de combinaison valide trouvé.")
     else:
-        print("\n[cyan]Les actions sélectionnées sont :[/cyan]")
+        print("\nLes actions sélectionnées sont :")
         for action in best_combination:
             print(f"  {action['name']} - Cost: {action['cost']}€, Profit: {action['profit']}%")
-        print(f"\n[cyan]Coût total des actions : {best_cost:.3f} euros[/cyan]")
-        print(f"[cyan]Profit total après 2 ans: {best_profit:.3f}€[/cyan]\n")
+        print(f"\nCoût total des actions : {best_cost:.3f} euros")
+        print(f"Profit total après 2 ans: {best_profit:.3f}€\n")
 
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"\nExecution time: {execution_time:.4f} seconds\n")
+
+    # Arrêt de la mesure de la mémoire et affichage des statistiques
+    current, peak = tracemalloc.get_traced_memory()
+    print(f"Current memory usage is {current / 1024 / 1024:.3f} MB; Peak was {peak / 1024 / 1024:.3f} MB")
+    tracemalloc.stop()
 
 # ------- décommanter la ligne ci dessous pour lancer sans le fichier main ------- #
 # brute_force()

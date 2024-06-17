@@ -1,13 +1,15 @@
 import csv
 import time
-from rich import print
+import tracemalloc
 
 # ----- Pour lancer sans le fichier main, vous devez décommenter la ligne situé a la fin du fichier ----- #
 
 
 def choice_csv():
-    """ Permet à l'utilisateur de choisir un fichier CSV parmi une liste prédéfinie. """
-    print("[cyan]Veuillez choisir le fichier CSV à analyser :[/cyan]")
+    """
+    Permet à l'utilisateur de choisir un fichier CSV parmi une liste prédéfinie.
+    """
+    print("Veuillez choisir le fichier CSV à analyser :")
     print("1. action_bruteforce.csv")
     print("2. data/dataset1_Python+P7.csv")
     print("3. data/dataset2_Python+P7.csv")
@@ -25,7 +27,9 @@ def choice_csv():
 
 
 def read_csv(csv_file_path):
-    """ Lit le fichier CSV et retourne une liste de dictionnaires représentant les actions."""
+    """
+    Lit le fichier CSV et retourne une liste de dictionnaires représentant les actions.
+    """
     actions = []
     with open(csv_file_path, mode='r', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -42,17 +46,23 @@ def read_csv(csv_file_path):
 
 
 def calculate_total_cost(selected_actions):
-    """ Calcule le coût total des actions sélectionnées."""
+    """
+    Calcule le coût total des actions sélectionnées.
+    """
     return sum(action['cost'] for action in selected_actions)
 
 
 def calculate_total_profit(selected_actions):
-    """ Calcule le profit total des actions sélectionnées après 2 ans."""
+    """
+    Calcule le profit total des actions sélectionnées après 2 ans.
+    """
     return sum((action['profit'] * action['cost']) / 100 for action in selected_actions)
 
 
 def select_actions(actions, max_budget):
-    """ Sélectionne les actions à acheter en maximisant le profit tout en respectant le budget."""
+    """
+    Sélectionne les actions à acheter en maximisant le profit tout en respectant le budget.
+    """
     actions.sort(key=lambda d: d['profit'], reverse=True)
     selected_actions = []
 
@@ -64,7 +74,12 @@ def select_actions(actions, max_budget):
 
 
 def optimized():
-    """ Exécute l'algorithme optimisé pour sélectionner les actions à acheter."""
+    """
+    Exécute l'algorithme optimisé pour sélectionner les actions à acheter.
+    """
+
+    # Début de la mesure de la mémoire
+    tracemalloc.start()
 
     max_budget = 500
 
@@ -83,18 +98,23 @@ def optimized():
     if not selected_actions:
         print("Pas de combinaison valide trouvée.")
     else:
-        print("\n[cyan]Les actions sélectionnées sont :[/cyan]")
+        print("\nLes actions sélectionnées sont :")
         for action in selected_actions:
             print(f"{action['name']} - Coût: {action['cost']}€, Profit: {action['profit']}%")
 
         total_cost = calculate_total_cost(selected_actions)
         total_profit = calculate_total_profit(selected_actions)
 
-        print(f"\n[cyan]Coût total des actions : {total_cost:.3f} euros[/cyan]")
-        print(f"[cyan]Profit total après 2 ans: {total_profit:.3f}€[/cyan]\n")
+        print(f"\nCoût total des actions : {total_cost:.3f} euros")
+        print(f"Profit total après 2 ans: {total_profit:.3f}€\n")
 
     end_time = time.time()
     print(f"Temps d'exécution : {end_time - start_time:.4f} secondes\n")
+
+    # Arrêt de la mesure de la mémoire et affichage des statistiques
+    current, peak = tracemalloc.get_traced_memory()
+    print(f"Current memory usage is {current / 1024 / 1024:.3f} MB; Peak was {peak / 1024 / 1024:.3f} MB")
+    tracemalloc.stop()
 
 # # ------- décommanter la ligne ci dessous pour lancer sans le fichier main ------- #
 # optimized()
